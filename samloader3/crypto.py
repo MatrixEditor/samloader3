@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import os
 import base64
+import typing as t
 
 from cryptography.hazmat.primitives.ciphers import (
     algorithms,
@@ -12,6 +14,7 @@ from cryptography.hazmat.primitives.padding import PKCS7
 
 KEY_1 = b"hqzdurufm2c8mf6bsjezu1qgveouv7c7"
 KEY_2 = b"w13r4cvf4hctaujv"
+
 
 def aes_decrypt(data: bytes, key: bytes) -> bytes:
     """
@@ -125,3 +128,50 @@ def pad(data: bytes, block_size: int = 0x80) -> bytes:
     """
     padder = PKCS7(block_size).padder()
     return padder.update(data) + padder.finalize()
+
+
+def file_decrypt(
+    path: str,
+    out: str,
+    key: bytes,
+    block_size: int = 4096,
+    key_version: t.Optional[str] = None,
+) -> None:
+    """
+    Decrypts a file using a given key.
+
+    :param path: Path to the input encrypted file.
+    :type path: str
+    :param out: Path to the output decrypted file.
+    :type out: str
+    :param key: Encryption key.
+    :type key: bytes
+    :param block_size: Size of the encryption block, defaults to 4096.
+    :type block_size: int, optional
+    :param key_version: Optional key version, defaults to None.
+    :type key_version: t.Optional[str]
+    :raises FileExistsError: Raised if the output path is the same as the input path.
+    """
+    total_size = os.stat(path).st_size
+    cipher = get_file_decryptor(key)
+
+    chunks = total_size // block_size + 1
+    if os.path.isdir(out):
+        name = os.path.basename(path).removesuffix(key_version or "")
+        out = os.path.join(out, name)
+
+    if os.path.abspath(path) == os.path.abspath(out):
+        raise FileExistsError("Output can not be Input (path == out)!")
+
+    with open(path, "rb") as istream, open(out, "wb") as ostream:
+        for i in range(chunks):
+            block = istream.read(block_size)
+            if not block:
+                break
+
+            decrypted = cipher.update(block)
+            if i == chunks - 1:
+                # we actually don't need .finalize() here
+                ostream.write(unpad(decrypted))
+            else:
+                ostream.write(decrypted)
