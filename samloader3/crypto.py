@@ -136,6 +136,7 @@ def file_decrypt(
     key: bytes,
     block_size: int = 4096,
     key_version: t.Optional[str] = None,
+    cb: t.Callable[[], None] = None
 ) -> None:
     """
     Decrypts a file using a given key.
@@ -171,7 +172,8 @@ def file_decrypt(
 
             decrypted = cipher.update(block)
             if i == chunks - 1:
-                # we actually don't need .finalize() here
-                ostream.write(unpad(decrypted))
+                ostream.write(unpad(decrypted + cipher.finalize()))
             else:
                 ostream.write(decrypted)
+            if cb:
+                cb()

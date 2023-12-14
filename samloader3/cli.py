@@ -4,10 +4,12 @@ import os
 import typing as t
 import argparse
 
+import shlex
 import cmd
 import signal
 import traceback
 
+from concurrent.futures import ThreadPoolExecutor
 from threading import Event
 
 from rich import print as pprint
@@ -29,7 +31,7 @@ from rich.markup import escape
 
 from samloader3.fus import FUSClient, firmware_spec_url, FUS_USER_AGENT, v4_key, v2_key
 from samloader3.firmware import FirmwareSpec, FirmwareInfo
-from samloader3 import crypto
+from samloader3 import crypto, __version__
 
 
 def _print_ok(msg) -> None:
@@ -42,6 +44,10 @@ def _print_error(msg) -> None:
 
 def _print_info(msg) -> None:
     pprint(r"\[  [bold cyan]Info[/]  ] " + msg)
+
+
+def _print_warn(msg) -> None:
+    pprint(r"\[  [bold yellow]Warn[/]  ] " + msg)
 
 
 class CLIExit(Exception):
@@ -131,26 +137,13 @@ class Decrypt(Task):
             total_size = os.stat(path).st_size
             task = self.progress.add_task("Decrypting File", total=total_size)
 
-            cipher = crypto.get_file_decryptor(key)
-            chunks = total_size // 4096 + 1
-            out = self.argv.out
-            if os.path.isdir(out):
-                name = os.path.basename(path)
-                out = os.path.join(out, name.removesuffix(key_version))
+            def update():
+                self.progress.advance(task, block_size)
 
-            with open(path, "rb") as fp, open(out, "wb") as ostream:
-                for i in range(chunks):
-                    block = fp.read(4096)
-                    if not block:
-                        print(block)
-                        break
-
-                    decrypted = cipher.update(block)
-                    if i == chunks - 1:
-                        ostream.write(crypto.unpad(decrypted))
-                    else:
-                        ostream.write(decrypted)
-                    self.progress.update(task, advance=4096)
+            try:
+                crypto.file_decrypt(path, self.argv.out, key, block_size, key_version, update)
+            except ValueError:
+                _print_error("[bold]Invalid Padding:[/] Most likely due to a wrong input file!")
 
 
 class Download(Task):
@@ -168,8 +161,9 @@ class Download(Task):
         self.names = []
 
     def handle_sigint(self, signum, frame):
+        if not self.done_event.is_set():
+            _print_info("Download canceled!")
         super().handle_sigint(signum, frame)
-        _print_info("Download canceled!")
 
     def _progress(self) -> Progress:
         """
@@ -210,18 +204,38 @@ class Download(Task):
             start = os.stat(path).st_size
 
         result = self.client.start_download(info, start)
-        self.progress.update(
-            task_id, total=int(result.headers["Content-Length"]), advance=start
-        )
-        with open(path, "wb") as dest_fp:
-            self.progress.start_task(task_id)
-            for chunk in result.iter_content(self.argv.chunk_size):
-                if self.done_event.is_set():
-                    return
+        total = int(result.headers["Content-Length"])
+        self.progress.update(task_id, total=total, advance=start)
+        self.progress.start_task(task_id)
+        if start < total:
+            with open(path, "wb") as dest_fp:
+                for chunk in result.iter_content(self.argv.chunk_size):
+                    if self.done_event.is_set():
+                        return
 
-                if chunk:
-                    dest_fp.write(chunk)
-                    self.progress.update(task_id, advance=len(chunk))
+                    if chunk:
+                        dest_fp.write(chunk)
+                        self.progress.update(task_id, advance=len(chunk))
+
+        if self.argv.decrypt:
+            self.progress.update(task_id, completed=0, filename="Decrypting file...")
+            if path.endswith(".enc4"):
+                _, dkey = v4_key(info)
+                key_version = "enc4"
+            elif path.endswith(".enc2"):
+                _, dkey = v2_key(info.version, info.model_name, info.local_code)
+                key_version = "enc2"
+            else:
+                _print_error(f"Could not find a suitable decryptor for {path}")
+                return
+
+            def update():
+                self.progress.update(task_id, advance=self.argv.block_size)
+
+            out = path.removesuffix(key_version)
+            crypto.file_decrypt(
+                path, out, dkey, self.argv.block_size, key_version, update
+            )
 
     def run(self, specs: t.List[FirmwareSpec], model, region) -> None:
         """
@@ -239,6 +253,10 @@ class Download(Task):
             data.append(self.client.fw_info(spec.normalized_version, model, region))
 
         with self.progress:
+            pool = None
+            if self.argv.parallel:
+                pool = ThreadPoolExecutor(max_workers=10)
+
             for info in data:
                 if info.binary_name in self.names:
                     continue
@@ -247,9 +265,15 @@ class Download(Task):
                 task_id = self.progress.add_task(
                     "download", filename=info.binary_name, start=False
                 )
-                self.do_download(task_id, info, self.argv.dest)
+                if pool is not None:
+                    pool.submit(self.do_download, task_id, info, self.argv.dest)
+                else:
+                    self.do_download(task_id, info, self.argv.dest)
                 if self.done_event.is_set():
                     return
+
+            if pool:
+                pool.shutdown(wait=True)
 
 
 class SamLoader3CLI(cmd.Cmd):
@@ -327,6 +351,9 @@ class SamLoader3CLI(cmd.Cmd):
         download_mod.add_argument("--chunk-size", type=int, default=32768)
         download_mod.add_argument("-o", "--out", dest="dest", type=str, required=True)
         download_mod.add_argument("--no-cache", action="store_true")
+        download_mod.add_argument("--decrypt", action="store_true")
+        download_mod.add_argument("--parallel", action="store_true")
+        download_mod.add_argument("--block-size", type=int, default=4096)
         download_mod.set_defaults(fn=self._download)
         self.parsers["download"] = download_mod
 
@@ -350,8 +377,7 @@ class SamLoader3CLI(cmd.Cmd):
         :param args: The command arguments.
         :type args: str
         """
-        # REVISIT: split(...) may not be applicable here
-        argv = self.parsers[name].parse_args(args.split(" "))
+        argv = self.parsers[name].parse_args(shlex.split(args))
         argv.fn(argv)
 
     def do_exit(self, args) -> None:
@@ -359,6 +385,21 @@ class SamLoader3CLI(cmd.Cmd):
         Handles the exit command.
         """
         raise CLIExit
+
+    def do_version(self, args) -> None:
+        """Prints the library's version"""
+        pprint(f"[bold]Version:[/] {__version__}")
+
+    def do_setmodel(self, args) -> None:
+        """Sets the model name to use"""
+        self.model = args
+
+    def do_setregion(self, args) -> None:
+        """Sets the region code to use"""
+        self.region = args
+
+    def default(self, line) -> None:
+        _print_warn(f"[bold]Unknown syntax:[/] {line}")
 
     def get_names(self):
         """
@@ -426,7 +467,7 @@ class SamLoader3CLI(cmd.Cmd):
 
     def _verify_device_info(self, argv) -> bool:
         model = self.get_model(argv)
-        region = self.get_model(argv)
+        region = self.get_region(argv)
         if not model or not region:
             _print_error("[bold]Device:[/] No device specified!")
             return False
