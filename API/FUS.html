@@ -1,0 +1,580 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="prev" title="Crypto Implementation" href="crypto.html" />
+
+    <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
+        <title>FUS (Firmware Update Server) API - samloader3 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=4c969af8" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #eeffcc;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">samloader3 1.0.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">samloader3 1.0.0 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">API Documentation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="firmware.html">Firmware Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crypto.html">Crypto Implementation</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">FUS (Firmware Update Server) API</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="fus-firmware-update-server-api">
+<span id="api-fus"></span><h1>FUS (Firmware Update Server) API<a class="headerlink" href="#fus-firmware-update-server-api" title="Link to this heading">#</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Additional documentation on the whole FUS API is provided
+here: <a class="reference external" href="https://samsung-loki.github.io/samsung-docs/docs/FUS/">samsung-loki.github.io/samsung-docs/docs/FUS/</a>.</p>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="samloader3.fus.AuthenticationError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">samloader3.fus.</span></span><span class="sig-name descname"><span class="pre">AuthenticationError</span></span><a class="reference internal" href="../_modules/samloader3/fus.html#AuthenticationError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#samloader3.fus.AuthenticationError" title="Link to this definition">#</a></dt>
+<dd><p>Custom exception for authentication errors.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="samloader3.fus.FUSAuthorization">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">samloader3.fus.</span></span><span class="sig-name descname"><span class="pre">FUSAuthorization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encrypted_nonce</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">realm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newauth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'1'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/samloader3/fus.html#FUSAuthorization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#samloader3.fus.FUSAuthorization" title="Link to this definition">#</a></dt>
+<dd><p>Represents FUS (Firmware Update Server ?) authorization information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encrypted_nonce</strong> (<em>str</em>) – The encrypted nonce.</p></li>
+<li><p><strong>signature</strong> (<em>str</em>) – The signature.</p></li>
+<li><p><strong>nc</strong> (<em>str</em>) – The nonce count.</p></li>
+<li><p><strong>type</strong> (<em>str</em>) – The authorization type.</p></li>
+<li><p><strong>realm</strong> (<em>str</em>) – The authentication realm.</p></li>
+<li><p><strong>newauth</strong> (<em>str</em>) – Flag indicating new authentication.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="samloader3.fus.FUSClient">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">samloader3.fus.</span></span><span class="sig-name descname"><span class="pre">FUSClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">25000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/samloader3/fus.html#FUSClient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#samloader3.fus.FUSClient" title="Link to this definition">#</a></dt>
+<dd><p>Represents a client for interacting with the Firmware Update Server (FUS).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>user_agent</strong> (<em>str</em><em>, </em><em>optional</em>) – The user agent to use in HTTP requests.</p></li>
+<li><p><strong>timeout</strong> (<em>int</em><em>, </em><em>optional</em>) – The timeout for HTTP requests in seconds.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="samloader3.fus.FUSClient.authv">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">authv</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#samloader3.fus.FUSClient.authv" title="Link to this definition">#</a></dt>
+<dd><p>The string representation of the authentication information.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="samloader3.fus.FUSClient.firmware_exists">
+<span class="sig-name descname"><span class="pre">firmware_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/samloader3/fus.html#FUSClient.firmware_exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#samloader3.fus.FUSClient.firmware_exists" title="Link to this definition">#</a></dt>
+<dd><p>Checks if firmware exists for a given model and local code.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_name</strong> (<em>str</em>) – The model name.</p></li>
+<li><p><strong>local_code</strong> (<em>str</em>) – The local code.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if firmware exists, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="samloader3.fus.FUSClient.fw_info">
+<span class="sig-name descname"><span class="pre">fw_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="firmware.html#samloader3.firmware.BinaryNature" title="samloader3.firmware.BinaryNature"><span class="pre">BinaryNature</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">BinaryNature.FACTORY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_product</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="firmware.html#samloader3.firmware.FirmwareInfo" title="samloader3.firmware.FirmwareInfo"><span class="pre">FirmwareInfo</span></a></span></span><a class="reference internal" href="../_modules/samloader3/fus.html#FUSClient.fw_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#samloader3.fus.FUSClient.fw_info" title="Link to this definition">#</a></dt>
+<dd><p>Retrieves firmware information from the FUS server.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>version</strong> (<em>str</em>) – The firmware version.</p></li>
+<li><p><strong>model_name</strong> (<em>str</em>) – The model name.</p></li>
+<li><p><strong>local_code</strong> (<em>str</em>) – The local code.</p></li>
+<li><p><strong>nature</strong> (<a class="reference internal" href="firmware.html#samloader3.firmware.BinaryNature" title="samloader3.firmware.BinaryNature"><em>BinaryNature</em></a><em>, </em><em>optional</em>) – The binary nature.</p></li>
+<li><p><strong>client_product</strong> (<em>str</em><em>, </em><em>optional</em>) – The client product name (default is “Smart Switch”).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The firmware information.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="firmware.html#samloader3.firmware.FirmwareInfo" title="samloader3.firmware.FirmwareInfo">FirmwareInfo</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="samloader3.fus.FUSClient.get_firmware_specs">
+<span class="sig-name descname"><span class="pre">get_firmware_specs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="firmware.html#samloader3.firmware.VersionInfo" title="samloader3.firmware.VersionInfo"><span class="pre">VersionInfo</span></a></span></span><a class="reference internal" href="../_modules/samloader3/fus.html#FUSClient.get_firmware_specs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#samloader3.fus.FUSClient.get_firmware_specs" title="Link to this definition">#</a></dt>
+<dd><p>Retrieves firmware specifications for a given model and local code.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_name</strong> (<em>str</em>) – The model name.</p></li>
+<li><p><strong>local_code</strong> (<em>str</em>) – The local code.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The firmware version information.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="firmware.html#samloader3.firmware.VersionInfo" title="samloader3.firmware.VersionInfo">VersionInfo</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="samloader3.fus.FUSClient.init_download">
+<span class="sig-name descname"><span class="pre">init_download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="firmware.html#samloader3.firmware.FirmwareInfo" title="samloader3.firmware.FirmwareInfo"><span class="pre">FirmwareInfo</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/samloader3/fus.html#FUSClient.init_download"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#samloader3.fus.FUSClient.init_download" title="Link to this definition">#</a></dt>
+<dd><p>Initializes the firmware download.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>info</strong> (<a class="reference internal" href="firmware.html#samloader3.firmware.FirmwareInfo" title="samloader3.firmware.FirmwareInfo"><em>FirmwareInfo</em></a>) – The firmware information.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="samloader3.fus.FUSClient.request">
+<span class="sig-name descname"><span class="pre">request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'POST'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_stream</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_cloud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Response</span></span></span><a class="reference internal" href="../_modules/samloader3/fus.html#FUSClient.request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#samloader3.fus.FUSClient.request" title="Link to this definition">#</a></dt>
+<dd><p>Makes a request to the FUS server.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – The key for the request.</p></li>
+<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – The HTTP method for the request (default is “POST”).</p></li>
+<li><p><strong>payload</strong> (<em>str</em><em>, </em><em>optional</em>) – The payload for the request.</p></li>
+<li><p><strong>query</strong> (<em>str</em><em>, </em><em>optional</em>) – The query parameters for the request.</p></li>
+<li><p><strong>headers</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional headers for the request.</p></li>
+<li><p><strong>as_stream</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag indicating if the response should be streamed.</p></li>
+<li><p><strong>from_cloud</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag indicating if the request is to the cloud domain.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The response from the FUS server.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>requests.Response</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="samloader3.fus.FUSClient.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/samloader3/fus.html#FUSClient.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#samloader3.fus.FUSClient.setup" title="Link to this definition">#</a></dt>
+<dd><p>Sets up the FUS client by generating a nonce.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="samloader3.fus.FUSClient.start_download">
+<span class="sig-name descname"><span class="pre">start_download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="firmware.html#samloader3.firmware.FirmwareInfo" title="samloader3.firmware.FirmwareInfo"><span class="pre">FirmwareInfo</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Response</span></span></span><a class="reference internal" href="../_modules/samloader3/fus.html#FUSClient.start_download"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#samloader3.fus.FUSClient.start_download" title="Link to this definition">#</a></dt>
+<dd><p>Starts the firmware download.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>info</strong> (<a class="reference internal" href="firmware.html#samloader3.firmware.FirmwareInfo" title="samloader3.firmware.FirmwareInfo"><em>FirmwareInfo</em></a>) – The firmware information.</p></li>
+<li><p><strong>start</strong> (<em>int</em><em>, </em><em>optional</em>) – The starting position for the download (default is 0).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The response from the FUS server.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>requests.Response</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="samloader3.fus.FUSHdr">
+<span class="sig-prename descclassname"><span class="pre">samloader3.fus.</span></span><span class="sig-name descname"><span class="pre">FUSHdr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'1.0'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/samloader3/fus.html#FUSHdr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#samloader3.fus.FUSHdr" title="Link to this definition">#</a></dt>
+<dd><p>Adds a header to the given XML message.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> (<em>ElementTree.Element</em>) – The XML message to which the header is added.</p></li>
+<li><p><strong>version</strong> (<em>str</em>) – The protocol version for the header.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="samloader3.fus.FUSBody">
+<span class="sig-prename descclassname"><span class="pre">samloader3.fus.</span></span><span class="sig-name descname"><span class="pre">FUSBody</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/samloader3/fus.html#FUSBody"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#samloader3.fus.FUSBody" title="Link to this definition">#</a></dt>
+<dd><p>Adds a body with specified data to the given XML message.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> (<em>ElementTree.Element</em>) – The XML message to which the body is added.</p></li>
+<li><p><strong>data</strong> (<em>dict</em>) – A dictionary containing data to be included in the body.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="samloader3.fus.FUSMsg">
+<span class="sig-prename descclassname"><span class="pre">samloader3.fus.</span></span><span class="sig-name descname"><span class="pre">FUSMsg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'1.0'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Element</span></span></span><a class="reference internal" href="../_modules/samloader3/fus.html#FUSMsg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#samloader3.fus.FUSMsg" title="Link to this definition">#</a></dt>
+<dd><p>Creates an XML message with the specified data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>dict</em>) – A dictionary containing data to be included in the message body.</p></li>
+<li><p><strong>version</strong> (<em>str</em>) – The protocol version for the header.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The created XML message.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ElementTree.Element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="samloader3.fus.firmware_spec_url">
+<span class="sig-prename descclassname"><span class="pre">samloader3.fus.</span></span><span class="sig-name descname"><span class="pre">firmware_spec_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/samloader3/fus.html#firmware_spec_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#samloader3.fus.firmware_spec_url" title="Link to this definition">#</a></dt>
+<dd><p>Generates the URL for fetching firmware specifications.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_name</strong> (<em>str</em>) – The model name for the firmware.</p></li>
+<li><p><strong>local_code</strong> (<em>str</em>) – The local code for the firmware.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The generated URL for fetching firmware specifications.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="samloader3.fus.v4_key">
+<span class="sig-prename descclassname"><span class="pre">samloader3.fus.</span></span><span class="sig-name descname"><span class="pre">v4_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="firmware.html#samloader3.firmware.FirmwareInfo" title="samloader3.firmware.FirmwareInfo"><span class="pre">FirmwareInfo</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">nature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="firmware.html#samloader3.firmware.BinaryNature" title="samloader3.firmware.BinaryNature"><span class="pre">BinaryNature</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">BinaryNature.FACTORY</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/samloader3/fus.html#v4_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#samloader3.fus.v4_key" title="Link to this definition">#</a></dt>
+<dd><p>Generates a version 4 key for the provided firmware information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>info</strong> (<a class="reference internal" href="firmware.html#samloader3.firmware.FirmwareInfo" title="samloader3.firmware.FirmwareInfo"><em>FirmwareInfo</em></a>) – The firmware information.</p></li>
+<li><p><strong>nature</strong> (<a class="reference internal" href="firmware.html#samloader3.firmware.BinaryNature" title="samloader3.firmware.BinaryNature"><em>BinaryNature</em></a>) – The binary nature (BinaryNature).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the key as a string and its MD5 digest.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[str, bytes]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="samloader3.fus.v2_key">
+<span class="sig-prename descclassname"><span class="pre">samloader3.fus.</span></span><span class="sig-name descname"><span class="pre">v2_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/samloader3/fus.html#v2_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#samloader3.fus.v2_key" title="Link to this definition">#</a></dt>
+<dd><p>Generates a version 2 key for the specified parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>version</strong> (<em>str</em>) – The firmware version.</p></li>
+<li><p><strong>model_name</strong> (<em>str</em>) – The model name for the firmware.</p></li>
+<li><p><strong>local_code</strong> (<em>str</em>) – The local code for the firmware.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the key as a string and its MD5 digest.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[str, bytes]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          <a class="prev-page" href="crypto.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Crypto Implementation</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, MatrixEditor
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">FUS (Firmware Update Server) API</a><ul>
+<li><a class="reference internal" href="#samloader3.fus.AuthenticationError"><code class="docutils literal notranslate"><span class="pre">AuthenticationError</span></code></a></li>
+<li><a class="reference internal" href="#samloader3.fus.FUSAuthorization"><code class="docutils literal notranslate"><span class="pre">FUSAuthorization</span></code></a></li>
+<li><a class="reference internal" href="#samloader3.fus.FUSClient"><code class="docutils literal notranslate"><span class="pre">FUSClient</span></code></a><ul>
+<li><a class="reference internal" href="#samloader3.fus.FUSClient.authv"><code class="docutils literal notranslate"><span class="pre">FUSClient.authv</span></code></a></li>
+<li><a class="reference internal" href="#samloader3.fus.FUSClient.firmware_exists"><code class="docutils literal notranslate"><span class="pre">FUSClient.firmware_exists()</span></code></a></li>
+<li><a class="reference internal" href="#samloader3.fus.FUSClient.fw_info"><code class="docutils literal notranslate"><span class="pre">FUSClient.fw_info()</span></code></a></li>
+<li><a class="reference internal" href="#samloader3.fus.FUSClient.get_firmware_specs"><code class="docutils literal notranslate"><span class="pre">FUSClient.get_firmware_specs()</span></code></a></li>
+<li><a class="reference internal" href="#samloader3.fus.FUSClient.init_download"><code class="docutils literal notranslate"><span class="pre">FUSClient.init_download()</span></code></a></li>
+<li><a class="reference internal" href="#samloader3.fus.FUSClient.request"><code class="docutils literal notranslate"><span class="pre">FUSClient.request()</span></code></a></li>
+<li><a class="reference internal" href="#samloader3.fus.FUSClient.setup"><code class="docutils literal notranslate"><span class="pre">FUSClient.setup()</span></code></a></li>
+<li><a class="reference internal" href="#samloader3.fus.FUSClient.start_download"><code class="docutils literal notranslate"><span class="pre">FUSClient.start_download()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#samloader3.fus.FUSHdr"><code class="docutils literal notranslate"><span class="pre">FUSHdr()</span></code></a></li>
+<li><a class="reference internal" href="#samloader3.fus.FUSBody"><code class="docutils literal notranslate"><span class="pre">FUSBody()</span></code></a></li>
+<li><a class="reference internal" href="#samloader3.fus.FUSMsg"><code class="docutils literal notranslate"><span class="pre">FUSMsg()</span></code></a></li>
+<li><a class="reference internal" href="#samloader3.fus.firmware_spec_url"><code class="docutils literal notranslate"><span class="pre">firmware_spec_url()</span></code></a></li>
+<li><a class="reference internal" href="#samloader3.fus.v4_key"><code class="docutils literal notranslate"><span class="pre">v4_key()</span></code></a></li>
+<li><a class="reference internal" href="#samloader3.fus.v2_key"><code class="docutils literal notranslate"><span class="pre">v2_key()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../_static/tabs.js?v=3ee01567"></script>
+    </body>
+</html>
