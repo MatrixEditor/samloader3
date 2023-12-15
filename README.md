@@ -38,7 +38,7 @@ versions:
 
 <p align="center">
 
-![cmd_list](/docs/cmd_list.png)
+![cmd_list](/docs/source/cmd_list.png)
 
 </p>
 
@@ -66,7 +66,7 @@ position. You can disable that behaviour using `--no-cache`. With a special vers
 To decrypt files directly after downloading them, use `--decrypt`.
 
 
-## Decrypt Firmware
+### Decrypt Firmware
 
 The decryption command (`decrypt`) is designd to operate on one file only. You just have
 to provide a version number and the file path:
@@ -79,3 +79,6 @@ to provide a version number and the file path:
 > If you only want to generate the decryption key, use `--key-only`. Note that the actual
 > key is the MD5 value
 
+## License
+
+Distributed under the GNU General Public License (V3). See LICENSE for more information.

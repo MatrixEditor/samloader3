@@ -1,3 +1,18 @@
+# Copyright (C) 2023 MatrixEditor
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 from __future__ import annotations
 
 import typing as t
@@ -13,6 +28,7 @@ from samloader3.crypto import get_logic_check, get_nonce, get_signature
 
 from ._util import xml_find
 
+# General constants
 FUS_CLOUD_DOMAIN = "cloud-neofussvr.samsungmobile.com"
 FUS_DOMAIN = "neofussvr.sslcs.cdngc.net"
 
@@ -304,7 +320,7 @@ class FUSClient:
             {
                 "ACCESS_MODE": 2,
                 "BINARY_NATURE": str(nature.value),
-                "CLIENT_PRODUCT": client_product or "Smart Switch",
+                "CLIENT_PRODUCT": client_product or "Bogus",
                 "DEVICE_FW_VERSION": version,
                 "DEVICE_LOCAL_CODE": local_code,
                 "DEVICE_MODEL_NAME": model_name,
