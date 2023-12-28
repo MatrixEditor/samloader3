@@ -27,8 +27,8 @@ from cryptography.hazmat.primitives.ciphers import (
 )
 from cryptography.hazmat.primitives.padding import PKCS7
 
-KEY_1 = b"hqzdurufm2c8mf6bsjezu1qgveouv7c7"
-KEY_2 = b"w13r4cvf4hctaujv"
+KEY_1 = b"vicopx7dqu06emacgpnpy8j8zwhduwlh"
+KEY_2 = b"9u7qab84rpc16gvk"
 
 
 def aes_decrypt(data: bytes, key: bytes) -> bytes:

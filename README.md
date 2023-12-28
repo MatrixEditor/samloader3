@@ -4,7 +4,7 @@ Cross plattform Firmware downloader and decryptor for Samsung devices with maxim
 A list of API examples are given in the documentation available at [Github-Pages](https://matrixeditor.github.io/samloader3).
 
 > [!NOTE]
-> This project was formerly hosted at `nlscc/samloader`, and has moved from `samloader/samloader` to an refactored and updated version with enhanced CLI support and an API documentation.
+> This project was formerly hosted at `nlscc/samloader`, and has moved from `samloader/samloader` to a refactored and updated version with enhanced CLI support and an API documentation.
 
 ## Installation
 
@@ -20,7 +20,7 @@ The interface procided here is separated into two layers. In The first one, one 
 operate on a shell that takes commands with arguments as input.
 
 ```console
-$ python3 -m samloader3 -M "SM-A336B" -R "SFR"
+$ python3 -m samloader3 -M "SM-A336B" -R "SFR" -I "35117439020457"
 (sl3)> # type commands here
 ```
 

@@ -252,7 +252,7 @@ class Download(Task):
                 path, out, dkey, self.argv.block_size, key_version, update
             )
 
-    def run(self, specs: t.List[FirmwareSpec], model, region) -> None:
+    def run(self, specs: t.List[FirmwareSpec], model, region, imei) -> None:
         """
         Runs the firmware download task.
 
@@ -262,10 +262,12 @@ class Download(Task):
         :type model: str
         :param region: The region.
         :type region: str
+        :param imei: The serial/imei number.
+        :type imei: str
         """
         data = []
         for spec in specs:
-            data.append(self.client.fw_info(spec.normalized_version, model, region))
+            data.append(self.client.fw_info(spec.normalized_version, model, region, imei))
 
         with self.progress:
             pool = None
@@ -305,6 +307,8 @@ class SamLoader3CLI(cmd.Cmd):
     :type model_name: Optional[str]
     :param region: The default region.
     :type region: Optional[str]
+    :param imei: The imei/serial number.
+    :type imei: Optional[str]
     """
 
     prompt = "(sl3)> "
@@ -322,12 +326,14 @@ class SamLoader3CLI(cmd.Cmd):
         user_agent: t.Optional[str] = None,
         model_name: t.Optional[str] = None,
         region: t.Optional[str] = None,
+        imei: t.Optional[str] = None,
     ) -> None:
         super().__init__()
         self.parsers = external_parsers or {}
         self.client = FUSClient(user_agent, timeout)
         self.model = model_name
         self.region = region
+        self.imei = imei
         self.setup_parsers()
 
         for name, parser in self.parsers.items():
@@ -356,6 +362,7 @@ class SamLoader3CLI(cmd.Cmd):
         )
         info_mod.add_argument("-m", "--model", required=False)
         info_mod.add_argument("-r", "--region", required=False)
+        info_mod.add_argument("-i", "--imei", required=False)
         info_mod.set_defaults(fn=self._list_info)
         self.parsers["list"] = info_mod
 
@@ -363,6 +370,7 @@ class SamLoader3CLI(cmd.Cmd):
         download_mod.add_argument("versions", nargs="+")
         download_mod.add_argument("-m", "--model", required=False)
         download_mod.add_argument("-r", "--region", required=False)
+        download_mod.add_argument("-i", "--imei", required=False)
         download_mod.add_argument("--chunk-size", type=int, default=32768)
         download_mod.add_argument("-o", "--out", dest="dest", type=str, required=True)
         download_mod.add_argument("--no-cache", action="store_true")
@@ -376,6 +384,7 @@ class SamLoader3CLI(cmd.Cmd):
         decrypt_mod.add_argument("path")
         decrypt_mod.add_argument("-m", "--model", required=False)
         decrypt_mod.add_argument("-r", "--region", required=False)
+        decrypt_mod.add_argument("-i", "--imei", required=False)
         decrypt_mod.add_argument("--key-only", action="store_true")
         decrypt_mod.add_argument("-v", "--version", required=True)
         decrypt_mod.add_argument("-o", "--out", default=".")
@@ -413,6 +422,10 @@ class SamLoader3CLI(cmd.Cmd):
         """Sets the region code to use"""
         self.region = args
 
+    def do_setimei(self, args) -> None:
+        """Sets the imei/serial code to use"""
+        self.imei = args
+
     def default(self, line) -> None:
         _print_warn(f"[bold]Unknown syntax:[/] {line}")
 
@@ -446,6 +459,17 @@ class SamLoader3CLI(cmd.Cmd):
         :rtype: Optional[str]
         """
         return argv.region or self.region
+
+    def get_imei(self, argv) -> t.Optional[str]:
+        """
+        Gets the region from command line arguments.
+
+        :param argv: The command line arguments.
+        :type argv: argparse.Namespace
+        :return: The imei/serial number.
+        :rtype: Optional[str]
+        """
+        return argv.imei or self.imei
 
     def get_candidates(
         self, specs, versions, include_all=False
@@ -505,6 +529,7 @@ class SamLoader3CLI(cmd.Cmd):
 
         model = self.get_model(argv)
         region = self.get_region(argv)
+        imei = self.get_imei(argv)
         if not self._verify_specs(model, region):
             return
 
@@ -528,13 +553,13 @@ class SamLoader3CLI(cmd.Cmd):
 
             with Live(table, refresh_per_second=4):
                 info = self.client.fw_info(
-                    specs.latest.normalized_version, model, region
+                    specs.latest.normalized_version, model, region, imei
                 )
                 table.add_row(info.current_os_version, info.version, "[green]True[/]")
                 if not argv.latest:
                     for upgrade in specs.upgrade:
                         info = self.client.fw_info(
-                            upgrade.normalized_version, model, region
+                            upgrade.normalized_version, model, region, imei
                         )
                         table.add_row(
                             info.current_os_version, info.version, "[red]False[/]"
@@ -546,7 +571,7 @@ class SamLoader3CLI(cmd.Cmd):
                 return
 
             spec = candidates[0]
-            info = self.client.fw_info(spec.normalized_version, model, region)
+            info = self.client.fw_info(spec.normalized_version, model, region, imei)
             tree = Tree(f"({model}): {info.version}")
             for key, value in info.entries.items():
                 if value is not None:
@@ -559,6 +584,7 @@ class SamLoader3CLI(cmd.Cmd):
 
         model = self.get_model(argv)
         region = self.get_region(argv)
+        imei = self.get_imei(argv)
         versions = argv.versions
 
         load_all = versions[0] == "*"
@@ -572,7 +598,7 @@ class SamLoader3CLI(cmd.Cmd):
 
         _print_info(f"Initialising Download of {len(candidates)} candidates...")
         downloader = Download(self.client, argv)
-        downloader.run(candidates, model, region)
+        downloader.run(candidates, model, region, imei)
 
     def _decrypt(self, argv) -> None:
         if not self._verify_device_info(argv):
@@ -580,6 +606,7 @@ class SamLoader3CLI(cmd.Cmd):
 
         model = self.get_model(argv)
         region = self.get_region(argv)
+        imei = self.get_imei(argv)
 
         version = argv.version
         path = str(argv.path)
@@ -588,7 +615,7 @@ class SamLoader3CLI(cmd.Cmd):
             if not self._connect() or not self._verify_specs(model, region):
                 return
 
-            info = self.client.fw_info(version, model, region)
+            info = self.client.fw_info(version, model, region, imei)
             key, dkey = v4_key(info)
             key_version = "enc4"
 
@@ -616,6 +643,7 @@ def run_with_args(args: t.Optional[t.List[str]] = None) -> None:
     parser.add_argument("-U", "--user-agent", default=FUS_USER_AGENT)
     parser.add_argument("-R", "--region", required=False)
     parser.add_argument("-M", "--model", required=False)
+    parser.add_argument("-I", "--imei", required=False)
     parser.add_argument("-T", "--timeout", default=0x61A8, type=int)
 
     argv = parser.parse_args(args)
@@ -624,6 +652,7 @@ def run_with_args(args: t.Optional[t.List[str]] = None) -> None:
         user_agent=argv.user_agent,
         model_name=argv.model,
         region=argv.region,
+        imei=argv.imei,
     )
     while True:
         try:
