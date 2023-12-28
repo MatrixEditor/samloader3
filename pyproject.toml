@@ -1,6 +1,6 @@
 [project]
 name = "samloader3"
-version = "1.0.0"
+version = "1.1.0"
 description="Updated implementation of the Samsung-Firmware Downloader (samloader)"
 authors = [
   { name="MatrixEditor", email="not@supported.com" },
