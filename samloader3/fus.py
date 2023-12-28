@@ -297,6 +297,7 @@ class FUSClient:
         version: str,
         model_name: str,
         local_code: str,
+        imei: str,
         nature: BinaryNature = BinaryNature.FACTORY,
         client_product: t.Optional[str] = None,
     ) -> FirmwareInfo:
@@ -309,6 +310,8 @@ class FUSClient:
         :type model_name: str
         :param local_code: The local code.
         :type local_code: str
+        :param imei: The imei/serial number.
+        :type imei: str
         :param nature: The binary nature.
         :type nature: BinaryNature, optional
         :param client_product: The client product name (default is "Smart Switch").
@@ -321,6 +324,8 @@ class FUSClient:
                 "ACCESS_MODE": 2,
                 "BINARY_NATURE": str(nature.value),
                 "CLIENT_PRODUCT": client_product or "Bogus",
+                "CLIENT_VERSION": "4.3.23123_1",
+                "DEVICE_IMEI_PUSH": imei,
                 "DEVICE_FW_VERSION": version,
                 "DEVICE_LOCAL_CODE": local_code,
                 "DEVICE_MODEL_NAME": model_name,
