@@ -225,7 +225,7 @@
 <span class="kn">from</span> <span class="nn">samloader3.firmware</span> <span class="kn">import</span> <span class="n">FirmwareInfo</span><span class="p">,</span> <span class="n">BinaryNature</span><span class="p">,</span> <span class="n">FirmwareSpec</span><span class="p">,</span> <span class="n">VersionInfo</span>
 <span class="kn">from</span> <span class="nn">samloader3.crypto</span> <span class="kn">import</span> <span class="n">get_logic_check</span><span class="p">,</span> <span class="n">get_nonce</span><span class="p">,</span> <span class="n">get_signature</span>
 
-<span class="kn">from</span> <span class="nn">._util</span> <span class="kn">import</span> <span class="n">xml_find</span>
+<span class="kn">from</span> <span class="nn">._util</span> <span class="kn">import</span> <span class="n">xml_find</span><span class="p">,</span> <span class="n">XMLPathError</span>
 
 <span class="c1"># General constants</span>
 <span class="n">FUS_CLOUD_DOMAIN</span> <span class="o">=</span> <span class="s2">&quot;cloud-neofussvr.samsungmobile.com&quot;</span>
@@ -567,11 +567,10 @@
         <span class="p">)</span>
         <span class="n">payload</span> <span class="o">=</span> <span class="n">ElementTree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">xml</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">NF_DownloadBinaryInform</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
-        <span class="c1"># TODO:  validate response</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">doc</span> <span class="o">=</span> <span class="n">ElementTree</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
-        <span class="k">except</span> <span class="n">ElementTree</span><span class="o">.</span><span class="n">ParseError</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ElementTree</span><span class="o">.</span><span class="n">ParseError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">AuthenticationError</span> <span class="kn">from</span> <span class="nn">exc</span>
         <span class="n">entries</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">potential_entry</span> <span class="ow">in</span> <span class="n">xml_find</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="s2">&quot;./FUSBody/Put&quot;</span><span class="p">):</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">potential_entry</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;./Data&quot;</span><span class="p">)</span>
