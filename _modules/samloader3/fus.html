@@ -530,6 +530,7 @@
         <span class="n">version</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">local_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">imei</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">nature</span><span class="p">:</span> <span class="n">BinaryNature</span> <span class="o">=</span> <span class="n">BinaryNature</span><span class="o">.</span><span class="n">FACTORY</span><span class="p">,</span>
         <span class="n">client_product</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FirmwareInfo</span><span class="p">:</span>
@@ -542,6 +543,8 @@
 <span class="sd">        :type model_name: str</span>
 <span class="sd">        :param local_code: The local code.</span>
 <span class="sd">        :type local_code: str</span>
+<span class="sd">        :param imei: The imei/serial number.</span>
+<span class="sd">        :type imei: str</span>
 <span class="sd">        :param nature: The binary nature.</span>
 <span class="sd">        :type nature: BinaryNature, optional</span>
 <span class="sd">        :param client_product: The client product name (default is &quot;Smart Switch&quot;).</span>
@@ -554,6 +557,8 @@
                 <span class="s2">&quot;ACCESS_MODE&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
                 <span class="s2">&quot;BINARY_NATURE&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nature</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
                 <span class="s2">&quot;CLIENT_PRODUCT&quot;</span><span class="p">:</span> <span class="n">client_product</span> <span class="ow">or</span> <span class="s2">&quot;Bogus&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;CLIENT_VERSION&quot;</span><span class="p">:</span> <span class="s2">&quot;4.3.23123_1&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;DEVICE_IMEI_PUSH&quot;</span><span class="p">:</span> <span class="n">imei</span><span class="p">,</span>
                 <span class="s2">&quot;DEVICE_FW_VERSION&quot;</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span>
                 <span class="s2">&quot;DEVICE_LOCAL_CODE&quot;</span><span class="p">:</span> <span class="n">local_code</span><span class="p">,</span>
                 <span class="s2">&quot;DEVICE_MODEL_NAME&quot;</span><span class="p">:</span> <span class="n">model_name</span><span class="p">,</span>
