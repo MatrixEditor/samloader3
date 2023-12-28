@@ -16,11 +16,11 @@ pip install git+https://github.com/MatrixEditor/samloader3.git
 
 ## CLI
 
-The interface procided here is separated into two layers. In The first one, one can set basic options, such as the device's country code, model name or a global timeout value. Next, you will
+The interface procided here is separated into two layers. In The first one, one can set basic options, such as the device's country code, model name, IMEI number or a global timeout value. Next, you will
 operate on a shell that takes commands with arguments as input.
 
 ```console
-$ python3 -m samloader3 -M "SM-A336B" -R "SFR" -I "35117439020457"
+$ python3 -m samloader3 -M "SM-A336B" -R "SFR" -I "12345678901234"
 (sl3)> # type commands here
 ```
 

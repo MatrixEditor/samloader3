@@ -26,7 +26,7 @@ import requests
 from samloader3.firmware import FirmwareInfo, BinaryNature, FirmwareSpec, VersionInfo
 from samloader3.crypto import get_logic_check, get_nonce, get_signature
 
-from ._util import xml_find
+from ._util import xml_find, XMLPathError
 
 # General constants
 FUS_CLOUD_DOMAIN = "cloud-neofussvr.samsungmobile.com"
@@ -334,11 +334,10 @@ class FUSClient:
         )
         payload = ElementTree.tostring(xml, encoding="utf-8")
         result = self.request(NF_DownloadBinaryInform, payload=payload)
-        # TODO:  validate response
         try:
             doc = ElementTree.fromstring(result.text)
-        except ElementTree.ParseError:
-            print(result.text)
+        except ElementTree.ParseError as exc:
+            raise AuthenticationError from exc
         entries = {}
         for potential_entry in xml_find(doc, "./FUSBody/Put"):
             data = potential_entry.find("./Data")

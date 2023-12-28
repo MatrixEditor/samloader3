@@ -24,6 +24,7 @@ import cmd
 import signal
 import traceback
 
+from xml.etree import ElementTree
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
 
@@ -44,7 +45,15 @@ from rich.progress import (
 )
 from rich.markup import escape
 
-from samloader3.fus import FUSClient, firmware_spec_url, FUS_USER_AGENT, v4_key, v2_key
+from samloader3.fus import (
+    FUSClient,
+    firmware_spec_url,
+    FUS_USER_AGENT,
+    v4_key,
+    v2_key,
+    AuthenticationError,
+    XMLPathError,
+)
 from samloader3.firmware import FirmwareSpec, FirmwareInfo
 from samloader3 import crypto, __version__
 
@@ -156,9 +165,13 @@ class Decrypt(Task):
                 self.progress.advance(task, block_size)
 
             try:
-                crypto.file_decrypt(path, self.argv.out, key, block_size, key_version, update)
+                crypto.file_decrypt(
+                    path, self.argv.out, key, block_size, key_version, update
+                )
             except ValueError:
-                _print_error("[bold]Invalid Padding:[/] Most likely due to a wrong input file!")
+                _print_error(
+                    "[bold]Invalid Padding:[/] Most likely due to a wrong input file!"
+                )
 
 
 class Download(Task):
@@ -266,8 +279,15 @@ class Download(Task):
         :type imei: str
         """
         data = []
-        for spec in specs:
-            data.append(self.client.fw_info(spec.normalized_version, model, region, imei))
+        try:
+            for spec in specs:
+                data.append(
+                    self.client.fw_info(spec.normalized_version, model, region, imei)
+                )
+        except XMLPathError as xml_exc:
+            _print_error(f"Invalid returned XML document: {xml_exc}")
+            pprint(ElementTree.tostring(xml_exc.doc).decode())
+            return
 
         with self.progress:
             pool = None
@@ -497,7 +517,11 @@ class SamLoader3CLI(cmd.Cmd):
     ### IMPLEMENTATION ###
     def _connect(self) -> bool:
         if not self.client.auth.encrypted_nonce:
-            self.client.setup()
+            try:
+                self.client.setup()
+            except AuthenticationError:
+                _print_error("Could not connect to FUS-Server (invalid credentials)")
+                return False
             if not self.client.auth.encrypted_nonce:
                 _print_error("Could not connect to FUS-Server!")
                 return False
@@ -511,7 +535,12 @@ class SamLoader3CLI(cmd.Cmd):
             _print_error("[bold]Device:[/] No device specified!")
             return False
 
-        _print_ok(f"[bold]Device:[/] {model}/{region}")
+        imei = self.get_imei(argv)
+        if not imei:
+            _print_error("[bold]Device:[/] IMEI not specified!")
+            return False
+
+        _print_ok(f"[bold]Device:[/] {model}/{region}/{imei}")
         return True
 
     def _verify_specs(self, model, region) -> bool:
@@ -545,38 +574,44 @@ class SamLoader3CLI(cmd.Cmd):
         versions = argv.version
         if "" in versions:
             versions.remove("")
-        if len(argv.version) == 0:
-            table = Table(title="Detailed Version Info")
-            table.add_column("OS Version", justify="left", no_wrap=True)
-            table.add_column("Version", justify="center")
-            table.add_column("Latest", justify="center")
+        try:
+            if len(argv.version) == 0:
+                table = Table(title="Detailed Version Info")
+                table.add_column("OS Version", justify="left", no_wrap=True)
+                table.add_column("Version", justify="center")
+                table.add_column("Latest", justify="center")
 
-            with Live(table, refresh_per_second=4):
-                info = self.client.fw_info(
-                    specs.latest.normalized_version, model, region, imei
-                )
-                table.add_row(info.current_os_version, info.version, "[green]True[/]")
-                if not argv.latest:
-                    for upgrade in specs.upgrade:
-                        info = self.client.fw_info(
-                            upgrade.normalized_version, model, region, imei
-                        )
-                        table.add_row(
-                            info.current_os_version, info.version, "[red]False[/]"
-                        )
-        else:
-            load_all = argv.version[0] == "*"
-            candidates = self.get_candidates(specs, argv.version, load_all)
-            if len(candidates) != 1:
-                return
+                with Live(table, refresh_per_second=4):
+                    info = self.client.fw_info(
+                        specs.latest.normalized_version, model, region, imei
+                    )
+                    table.add_row(
+                        info.current_os_version, info.version, "[green]True[/]"
+                    )
+                    if not argv.latest:
+                        for upgrade in specs.upgrade:
+                            info = self.client.fw_info(
+                                upgrade.normalized_version, model, region, imei
+                            )
+                            table.add_row(
+                                info.current_os_version, info.version, "[red]False[/]"
+                            )
+            else:
+                load_all = argv.version[0] == "*"
+                candidates = self.get_candidates(specs, argv.version, load_all)
+                if len(candidates) != 1:
+                    return
 
-            spec = candidates[0]
-            info = self.client.fw_info(spec.normalized_version, model, region, imei)
-            tree = Tree(f"({model}): {info.version}")
-            for key, value in info.entries.items():
-                if value is not None:
-                    tree.add(f'[italic]{key}[/] -> "{value}"')
-            pprint(tree)
+                spec = candidates[0]
+                info = self.client.fw_info(spec.normalized_version, model, region, imei)
+                tree = Tree(f"({model}): {info.version}")
+                for key, value in info.entries.items():
+                    if value is not None:
+                        tree.add(f'[italic]{key}[/] -> "{value}"')
+                pprint(tree)
+        except XMLPathError as xml_exc:
+            _print_error(f"XML Error: {xml_exc} - Most likely due to an incompatible IMEI!")
+            pprint(ElementTree.tostring(xml_exc.doc).decode())
 
     def _download(self, argv) -> None:
         if not self._verify_device_info(argv) or not self._connect():
